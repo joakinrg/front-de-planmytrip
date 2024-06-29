@@ -1,6 +1,15 @@
 import Image from "next/image";
+import TravelCard from "@/components/TravelCard";
+import { options } from "./api/auth/[...nextauth]/options";
+import { getServerSession } from "next-auth";
 
-export default function Home() {
+export default async function Home() {
+  const session = await getServerSession(options)
+
+
+
+
+
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Contenedor de la sección con imagen de fondo */}
@@ -97,6 +106,16 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        <>
+        
+          {session ? (
+            <TravelCard user= {session?.user} pagetype = {"Home"}/>
+          ): (
+            <h1 className="text-5xl"><a href="/Cuenta">Inicia sesión</a></h1>
+          )}
+        </>
+
 
         {/* Sección de Desarrolladores */}
         <div className="mt-12">
