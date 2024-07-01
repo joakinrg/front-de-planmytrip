@@ -61,7 +61,7 @@ export default async function Home() {
           <div className="text-right">
             <h4 className="text-2xl font-bold">Aprende Más</h4>
             <a
-              href="#"
+              href="/Cuenta"
               className="text-white bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-lg inline-block mt-2 transition-colors duration-300"
             >
               Registrarse

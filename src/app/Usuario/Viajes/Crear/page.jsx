@@ -71,9 +71,9 @@ function Crear() {
       e.preventDefault()
       const res = await registerTrip(datosGenerales, modos,presupuesto, session)
       if(res?.error) {
-        push("/Usuario/Viajes")
-      } else {
         push("/Usuario/Viajes/Crear")
+      } else {
+        push("/Usuario/Viajes")
       }
   }
 

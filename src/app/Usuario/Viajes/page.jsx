@@ -1,9 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { showMyTrips } from "@/app/api/data/viajes";
+import { showMyTrips, deleteMyTrip } from "@/app/api/data/viajes";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Editar from "./Editar/[id]/page";
+
 async function fetchMyTrips(email) {
   try {
     const res = await showMyTrips(email);
@@ -16,6 +17,7 @@ async function fetchMyTrips(email) {
     );
   }
 }
+
 function formatDate(dateStr) {
   const date = new Date(dateStr);
   return date.toLocaleDateString("es-ES", {
@@ -27,7 +29,9 @@ function formatDate(dateStr) {
 
 function Viajes() {
   const { data: session, status } = useSession();
-  const [misViajes, setMisViajes] = useState();
+  const [misViajes, setMisViajes] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [tripToDelete, setTripToDelete] = useState(null);
 
   useEffect(() => {
     const myTravels = async () => {
@@ -40,16 +44,30 @@ function Viajes() {
 
     myTravels();
   }, [session, status]);
-  if (misViajes === undefined) {
-  } else {
-    const IdViaje = misViajes.id;
 
-    return (
-      <>
-        <Editar id={IdViaje} />
-      </>
-    );
-  }
+  const handleDeleteClick = (id) => {
+    setTripToDelete(id);
+    setShowModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (tripToDelete) {
+      try {
+        await deleteTrip(tripToDelete);
+        setMisViajes(misViajes.filter((viaje) => viaje.id !== tripToDelete));
+        setShowModal(false);
+        setTripToDelete(null);
+      } catch (error) {
+        console.error("Error al eliminar el viaje: ", error);
+      }
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowModal(false);
+    setTripToDelete(null);
+  };
+
   return (
     <div
       className="relative min-h-screen bg-cover bg-center bg-gray-800 flex items-center justify-center"
@@ -62,34 +80,41 @@ function Viajes() {
         </h1>
         {misViajes ? (
           <div className="space-y-4">
-            <div className="bg-slate-700 bg-opacity-70 text-white rounded-lg shadow-lg p-6 max-w-md mx-auto w-96">
-              <h2 className="text-xl font-bold mb-2">{misViajes.titulo}</h2>
-              <p className="mb-2">
-                <strong>Fecha de inicio:</strong>{" "}
-                {formatDate(misViajes.fechaInicio)}
-              </p>
-              <p className="mb-2">
-                <strong>Fecha de regreso:</strong>{" "}
-                {formatDate(misViajes.fechaRegreso)}
-              </p>
-              <p className="mb-4">
-                <strong>Destino:</strong> {misViajes.destino}
-              </p>
-
-              <div className="flex space-x-4 justify-center">
-                <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg">
-                  <Link
-                    href="/Usuario/Viajes/Editar/[id].jsx"
-                    as={`/Usuario/Viajes/Editar/${misViajes.id}`}
+          
+              <div
+           
+                className="bg-slate-700 bg-opacity-70 text-white rounded-lg shadow-lg p-6 max-w-md mx-auto w-96"
+              >
+                <h2 className="text-xl font-bold mb-2">{misViajes.titulo}</h2>
+                <p className="mb-2">
+                  <strong>Fecha de inicio:</strong>{" "}
+                  {formatDate(misViajes.fechaInicio)}
+                </p>
+                <p className="mb-2">
+                  <strong>Fecha de regreso:</strong>{" "}
+                  {formatDate(misViajes.fechaRegreso)}
+                </p>
+                <p className="mb-4">
+                  <strong>Destino:</strong> {misViajes.destino}
+                </p>
+                <div className="flex space-x-4 justify-center">
+                  <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg">
+                    <Link
+                      href={`/Usuario/Viajes/Editar/${misViajes.id}`}
+                      as={`/Usuario/Viajes/Editar/${misViajes.id}`}
+                    >
+                      Editar Viaje
+                    </Link>
+                  </button>
+                  <button
+                    onClick={() => handleDeleteClick(misViajes.id)}
+                    className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg"
                   >
-                    Editar Viaje
-                  </Link>
-                </button>
-                <button className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg">
-                  Eliminar Viaje
-                </button>
+                    Eliminar Viaje
+                  </button>
+                </div>
               </div>
-            </div>
+         
           </div>
         ) : (
           <div>
@@ -131,6 +156,29 @@ function Viajes() {
           </span>
         </a>
       </div>
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <h2 className="text-xl font-bold mb-4">
+              ¿Estás seguro que quieres eliminar este viaje?
+            </h2>
+            <div className="flex space-x-4 justify-center">
+              <button
+                onClick={confirmDelete}
+                className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg"
+              >
+                Sí
+              </button>
+              <button
+                onClick={cancelDelete}
+                className="bg-gray-500 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded-lg"
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

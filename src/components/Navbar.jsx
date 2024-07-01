@@ -77,11 +77,11 @@ function Navbar() {
               </li>
               <li className="relative flex items-center">
                 <a
-                  href="/"
+                  href="/api/auth/signout"
                   onClick={handleSignOut}
                   className="hover:bg-gray-500 px-3 py-2 rounded flex items-center"
                 >
-                  <span className="mr-2">Cerrar Sesión</span>
+                  <span className="mr-2" >Cerrar Sesión</span>
                   <svg
                     className="w-6 h-6 ml-2 text-gray-800 dark:text-white"
                     aria-hidden="true"
