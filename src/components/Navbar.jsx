@@ -1,22 +1,20 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { signOut, useSession, SessionProvider } from "next-auth/react";
+import React  from "react";
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-
-
-
+ 
 function Navbar() {
   const router = useRouter();
  const {data: session, status, update} = useSession()
 
  
   const handleSignOut = async () => {
-    const data = await signOut();
+    const data = await signOut({callbackUrl:"/"});
 
     if (!data.error) {
       console.log("data: ", data);
+     // await update();
       router.push("/");
-      router.refresh();
     } else {
       console.error("Error al cerrar sesión:", data.error);
     }
@@ -46,33 +44,16 @@ function Navbar() {
             <>
               <li className="relative flex items-center">
                 <a
-                  href="/Cuenta/Usuario/Viajes"
+                  href="/Usuario/Viajes"
                   className="hover:bg-gray-500 px-3 py-2 rounded flex items-center"
                 >
-                  <span className="mr-2">Viajes</span>
-                  <svg
-                    className="h-6 w-6 text-white-700"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    strokeWidth="2"
-                    stroke="currentColor"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path stroke="none" d="M0 0h24v24H0z" />
-                    <path
-                      d="M15 12h5a2 2 0 0 1 0 4h-15l-3 -6h3l2 2h3l-2 -7h3z"
-                      transform="rotate(-15 12 12) translate(0 -1)"
-                    />
-                    <line x1="3" y1="21" x2="21" y2="21" />
-                  </svg>
+                  <span className="mr-2">Mis Viajes</span>
+                  <svg className="h-6 w-6 text-white-500"  width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <path d="M16 10h4a2 2 0 0 1 0 4h-4l-4 7h-3l2 -7h-4l-2 2h-3l2-4l-2 -4h3l2 2h4l-2 -7h3z" /></svg>
                 </a>
               </li>
               <li className="relative flex items-center">
                 <a
-                  href="/Cuenta/Usuario/Dashboard"
+                  href="/Usuario/Dashboard"
                   className="hover:bg-gray-500 px-3 py-2 rounded flex items-center"
                 >
                   <span className="mr-2">Dashboard</span>
@@ -170,13 +151,4 @@ function Navbar() {
   );
 }
 
-// Envuelve tu componente Navbar con SessionProvider y asegúrate de obtener la sesión correctamente
-const NavbarWithSession = () => {
-  return (
-    <SessionProvider>
-      <Navbar />
-    </SessionProvider>
-  );
-};
-
-export default NavbarWithSession;
+export default Navbar;

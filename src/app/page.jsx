@@ -1,5 +1,4 @@
 import Image from "next/image";
-import TravelCard from "@/components/TravelCard";
 import { options } from "./api/auth/[...nextauth]/options";
 import { getServerSession } from "next-auth";
 
@@ -107,15 +106,7 @@ export default async function Home() {
           </div>
         </div>
 
-        <>
-        
-          {session ? (
-            <TravelCard user= {session?.user} pagetype = {"Home"}/>
-          ): (
-            <h1 className="text-5xl"><a href="/Cuenta">Inicia sesión</a></h1>
-          )}
-        </>
-
+ 
 
         {/* Sección de Desarrolladores */}
         <div className="mt-12">

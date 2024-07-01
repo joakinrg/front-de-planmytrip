@@ -37,9 +37,12 @@ export const options = {
     strategy: "jwt",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id;
+      }
+      if(trigger === "update") {
+        return null
       }
       return token;
     },

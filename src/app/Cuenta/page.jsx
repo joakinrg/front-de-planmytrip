@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-
+import { signUp } from "../api/data/register";
 function Cuenta() {
   const { push } = useRouter();
   const [showLoginForm, setShowLoginForm] = useState(false);
@@ -12,28 +12,51 @@ function Cuenta() {
   const [username, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [apellidoM, setapellidoM] = useState("");
+  const [apellidoP, setapellidoP] = useState("");
+  //HandleSignup
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    const res = await signUp(email, password, username, apellidoM, apellidoP);
+    console.log("Sign up response: ", res);
+
+    if (res?.error) {
+      push("/Cuenta");
+    } else {
+      const login = await signIn("credentials", {
+        email: email,
+        password: password,
+        redirect: false,
+      });
+
+      if (login?.error) {
+        push("/Cuenta");
+      } else {
+        push("/Usuario/Viajes");
+      }
+    }
+  };
 
   // HandleLogin
   const handleLogin = async (event) => {
     event.preventDefault();
-  
+
     console.log("Logging in with", { email, password });
     const res = await signIn("credentials", {
       email: email,
       password: password,
       redirect: false,
     });
-  
+
     console.log("Login response:", res);
     // Asegúrate de que res contiene los datos esperados
     if (res?.error) {
-    push("/Cuenta")
+      push("/Cuenta");
     } else {
       push("/Usuario/Viajes");
-      
     }
   };
-  
+
   const toggleForm = () => {
     setShowLoginForm(true);
   };
@@ -55,14 +78,14 @@ function Cuenta() {
         <h2 className="text-3xl font-bold mb-4">Registro e Inicio de Sesión</h2>
 
         {!showLoginForm && (
-          <form className="mb-8 space-y-4">
+          <form className="mb-8 space-y-4" onSubmit={handleSignUp}>
             <h3 className="text-xl font-semibold mb-2">Registro</h3>
             <div>
               <label
                 htmlFor="username"
                 className="block text-sm font-medium text-gray-700"
               >
-                Nombre de Usuario
+                Nombre
               </label>
               <input
                 type="text"
@@ -73,6 +96,41 @@ function Cuenta() {
                 className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
               />
             </div>
+
+            <div>
+              <label
+                htmlFor="appat"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Apellido Paterno
+              </label>
+              <input
+                type="text"
+                id="appat"
+                name="appat"
+                value={apellidoP}
+                onChange={(e) => setapellidoP(e.target.value)}
+                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="apmat"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Apellido Materno
+              </label>
+              <input
+                type="text"
+                id="apmat"
+                name="apmat"
+                value={apellidoM}
+                onChange={(e) => setapellidoM(e.target.value)}
+                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+              />
+            </div>
+
             <div>
               <label
                 htmlFor="email"
