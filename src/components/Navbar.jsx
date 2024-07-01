@@ -53,10 +53,10 @@ function Navbar() {
               </li>
               <li className="relative flex items-center">
                 <a
-                  href="/Usuario/Dashboard"
+                  href="/Usuario/Datos"
                   className="hover:bg-gray-500 px-3 py-2 rounded flex items-center"
                 >
-                  <span className="mr-2">Dashboard</span>
+                  <span className="mr-2">Datos</span>
                   <svg
                     className="h-6 w-6 text-white-700"
                     width="24"
