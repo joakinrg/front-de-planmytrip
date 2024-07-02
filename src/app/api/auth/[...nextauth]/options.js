@@ -12,7 +12,7 @@ export const options = {
       async authorize(credentials) {
         console.log("Authorizing with credentials:", credentials);
         console.log(process.env.NEXT_PUBLIC_LOGIN_USER);
-        const res = await fetch(`http://localhost:8000/auth/login`, {
+        const res = await fetch(`http://[::1]:8000/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

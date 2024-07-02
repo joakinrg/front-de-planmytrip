@@ -36,7 +36,7 @@ function Cuenta() {
       }
     }
   };
-
+//ya tardo demasiado siii :c en el back de soporte, dice que el servidor corre en [::1] en vez de localhost hmm
   // HandleLogin
   const handleLogin = async (event) => {
     event.preventDefault();

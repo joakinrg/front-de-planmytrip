@@ -8,7 +8,7 @@ export const showMyTrips = async (email) => {
   try {
     // Realizar la solicitud GET con el email como parámetro de consulta
     const getAllMyTrips = await axios.get(
-      `http://localhost:8000/viajes/asociados/${email}`,
+      `http://[::1]:8000/viajes/asociados/${email}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -32,7 +32,7 @@ export const showMyTrips = async (email) => {
 
 export const getMyTrip = async (id) => {
   try {
-    const getMyOneTrip = await axios.get(`http://localhost:8000/viajes/${id}`, {
+    const getMyOneTrip = await axios.get(`http://[::1]:8000/viajes/${id}`, {
       headers: {
         "Content-Type": "application-json",
       },
@@ -59,7 +59,7 @@ export const updateMyTrip = async (formData, id) => {
 
     console.log(titulo," ", fechaI, " ", fechaR, " ", descripcion, " ", destino)
     const getMyOneTrip = await axios.patch(
-      `http://localhost:8000/viajes/${id}`,
+      `http://[::1]:8000/viajes/${id}`,
       {
         titulo: titulo,
         fechaInicio: fechaI.toISOString(),

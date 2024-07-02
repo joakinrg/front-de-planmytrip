@@ -4,7 +4,7 @@ import axios from "axios";
 export const showMyDatos = async (email) => {
     try {
         // Realizar la solicitud GET con el email como parámetro de consulta
-        const getAllMyDatos = await axios.get(`http://localhost:8000/user/search/email/${email}`, {
+        const getAllMyDatos = await axios.get(`http://[::1]:8000/user/search/email/${email}`, {
             headers: {
                 "Content-Type": "application/json"
             }
@@ -40,7 +40,7 @@ export const updateMyDatos = async (misDatos) => {
         })
 
 
-        const updateEmail = await axios.patch(`http://localhost:8000/user/email/${id}`,{
+        const updateEmail = await axios.patch(`http://[::1]:8000/user/email/${id}`,{
             email: misDatos[0].email
         }, {
             headers: {
