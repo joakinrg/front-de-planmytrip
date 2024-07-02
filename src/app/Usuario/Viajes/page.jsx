@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { showMyTrips, deleteMyTrip } from "@/app/api/data/viajes";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Editar from "./Editar/[id]/page";
 
@@ -26,10 +27,22 @@ function formatDate(dateStr) {
     year: "numeric",
   });
 }
-
+async function deleteTrip(id) {
+  try {
+    const res = await deleteMyTrip(id);
+    console.log("Se borro el viaje: ", res);
+    return res;
+  } catch (error) {
+    console.error(
+      "Error del servidor: No se pudo borrar el viaje: ",
+      error
+    );
+  }
+}
 function Viajes() {
+  const {router} = useRouter
   const { data: session, status } = useSession();
-  const [misViajes, setMisViajes] = useState([]);
+  const [misViajes, setMisViajes] = useState();
   const [showModal, setShowModal] = useState(false);
   const [tripToDelete, setTripToDelete] = useState(null);
 
@@ -38,6 +51,7 @@ function Viajes() {
       if (status === "authenticated") {
         const email = session.user.email;
         const viajes = await fetchMyTrips(email);
+        console.log(viajes)
         setMisViajes(viajes);
       }
     };
@@ -54,6 +68,7 @@ function Viajes() {
     if (tripToDelete) {
       try {
         await deleteTrip(tripToDelete);
+        router.reload()
         setMisViajes(misViajes.filter((viaje) => viaje.id !== tripToDelete));
         setShowModal(false);
         setTripToDelete(null);
@@ -67,7 +82,20 @@ function Viajes() {
     setShowModal(false);
     setTripToDelete(null);
   };
+  const callfunc = () => {
+    if (misViajes === undefined) {
+      console.log("indefniido")
+    } else {
+      const IdViaje = misViajes.id;
+  
+      return (
+        <>
+          <Editar id={IdViaje} />
+        </>
+      );
+  }
 
+  }
   return (
     <div
       className="relative min-h-screen bg-cover bg-center bg-gray-800 flex items-center justify-center"
@@ -98,7 +126,7 @@ function Viajes() {
                   <strong>Destino:</strong> {misViajes.destino}
                 </p>
                 <div className="flex space-x-4 justify-center">
-                  <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg">
+                  <button onClick= {callfunc}className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg">
                     <Link
                       href={`/Usuario/Viajes/Editar/${misViajes.id}`}
                       as={`/Usuario/Viajes/Editar/${misViajes.id}`}
@@ -157,7 +185,7 @@ function Viajes() {
         </a>
       </div>
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10">
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
             <h2 className="text-xl font-bold mb-4">
               ¿Estás seguro que quieres eliminar este viaje?

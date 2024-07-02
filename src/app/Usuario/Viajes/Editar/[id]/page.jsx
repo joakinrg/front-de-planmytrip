@@ -3,10 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { getMyTrip, updateMyTrip } from '@/app/api/data/viajes';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+
 async function fetchMyTrip(id) {
   try {
     const res = await getMyTrip(id);
-    console.log("Se obtuvo mi viaje: ", res);
     return res;
   } catch (error) {
     console.error("Error del servidor: No se pudo traer este viaje: ", error);
@@ -15,12 +15,15 @@ async function fetchMyTrip(id) {
 
 async function sendMyUpdateInfo(formData, id) {
   try {
-    const res = await updateMyTrip(formData, id)
-    return res
+    console.log(formData)
+    const res = await updateMyTrip(formData, id);
+    console.log("respuesta después de actualizar: ", res);
+    return res;
   } catch (error) {
-    console.error("Error del servidor: No se pudo actualizar los datos: ", error)
+    console.error("Error del servidor: No se pudo actualizar los datos: ", error);
   }
 }
+
 function formatDate(dateStr) {
   const date = new Date(dateStr);
   return date.toLocaleDateString("es-ES", {
@@ -29,9 +32,9 @@ function formatDate(dateStr) {
     year: "numeric",
   });
 }
- 
-function Editar({ id }) {
-  const {push} = useRouter()
+
+function Editar(id) {
+  const { push } = useRouter();
   const { data: session, status } = useSession();
   const [miViaje, setMiViaje] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -42,16 +45,16 @@ function Editar({ id }) {
     destino: '',
     descripcion: ''
   });
- 
+
   useEffect(() => {
     const myTravel = async () => {
       if (status === "authenticated") {
-        const viaje = await fetchMyTrip(id);
+        const viaje = await fetchMyTrip(id.params.id);
         setMiViaje(viaje);
         setFormData({
           titulo: viaje.titulo,
-          fechaInicio: viaje.fechaInicio.split('T')[0], // Formateo para el input type date
-          fechaRegreso: viaje.fechaRegreso.split('T')[0], // Formateo para el input type date
+          fechaInicio: viaje.fechaInicio.split('T')[0],
+          fechaRegreso: viaje.fechaRegreso.split('T')[0],
           destino: viaje.destino,
           descripcion: viaje.descripcion,
         });
@@ -72,19 +75,18 @@ function Editar({ id }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Aquí iría la lógica para actualizar los datos del viaje
 
     const myNewTravel = async () => {
-      const newTravel = await sendMyUpdateInfo(formData, id) 
-      if(newTravel === undefined) {
-        push(`/Usuario/Viajes/Editar/${id}`)
-      }  else {
-        push("/Usuario/Viajes")
-        
+      const newTravel = await sendMyUpdateInfo(formData, id.params.id);
+      if (newTravel === undefined) {
+        push("/Usuario/Viajes");
+      } else {
+        setMiViaje(newTravel);
+        push("/Usuario/Viajes");
       }
-    }
-    
-myNewTravel()
+    };
+
+    myNewTravel();
     console.log('Datos actualizados:', formData);
     setIsEditing(false);
   };
@@ -93,9 +95,9 @@ myNewTravel()
     <div className="relative min-h-screen bg-cover bg-center bg-gray-800 flex items-center justify-center" style={{ backgroundImage: "url('/fondo-mis-viajes.jpg')" }}>
       <div className="absolute inset-0 bg-black opacity-50"></div>
       <div className="relative z-10 flex flex-col items-center justify-center h-full text-white text-center">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8">Editar Viaje</h1>
         {miViaje ? (
           <>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8">{isEditing ? 'Editar Viaje' : 'Mis Viajes'}</h1>
             {!isEditing ? (
               <div className="bg-gray-700 bg-opacity-70 text-white rounded-lg shadow-lg p-6 max-w-md mx-auto w-96">
                 <p className="mb-2"><strong>Mi título:</strong> {miViaje.titulo}</p>
@@ -136,6 +138,9 @@ myNewTravel()
                 </div>
               </form>
             )}
+            <span className="absolute bottom-full right-1/2 transform translate-x-1/2 mb-2 w-max px-2 py-1 bg-black text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity">
+              Crear Viaje
+            </span>
           </>
         ) : (
           <div>Cargando datos...</div>

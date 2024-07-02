@@ -1,12 +1,16 @@
 import axios from "axios";
-const cambiarFormato = (fechaStr) => {
-    const [anio, mes, dia] = fechaStr.split("-");
-    return new Date(`${dia}-${mes}-${anio}`);
-  };
-// Función para obtener todos los viajes asociados a un usuario por su email
+const cambiarFormato = (fechaDate) => {
+  const dia = String(fechaDate.getDate()).padStart(2, '0');
+  const mes = String(fechaDate.getMonth() + 1).padStart(2, '0'); // Los meses van de 0 a 11, por eso se suma 1
+  const anio = fechaDate.getFullYear();
+  const formattedDate = `${dia}-${mes}-${anio}`;
+  console.log(formattedDate);
+  return formattedDate;
+};
+
 export const showMyTrips = async (email) => {
   try {
-    // Realizar la solicitud GET con el email como parámetro de consulta
+
     const getAllMyTrips = await axios.get(
       `http://[::1]:8000/viajes/asociados/${email}`,
       {
@@ -32,6 +36,7 @@ export const showMyTrips = async (email) => {
 
 export const getMyTrip = async (id) => {
   try {
+    console.log(id)
     const getMyOneTrip = await axios.get(`http://[::1]:8000/viajes/${id}`, {
       headers: {
         "Content-Type": "application-json",
@@ -54,19 +59,22 @@ export const updateMyTrip = async (formData, id) => {
 
     const {titulo, fechaInicio, fechaRegreso, destino, descripcion} = formData
   try {
-    const fechaI = cambiarFormato(fechaInicio);
-    const fechaR = cambiarFormato(fechaRegreso);
+    const fI = new Date(fechaInicio)
+    const fR = new Date(fechaRegreso)
+    const fechaI = cambiarFormato(fI)
+    const fechaR = cambiarFormato(fR)
 
-    console.log(titulo," ", fechaI, " ", fechaR, " ", descripcion, " ", destino)
-    const getMyOneTrip = await axios.patch(
+    
+    console.log(fechaI, " ", fechaR)
+
+    const updateMyOneTrip = await axios.patch(
       `http://[::1]:8000/viajes/${id}`,
       {
         titulo: titulo,
-        fechaInicio: fechaI.toISOString(),
-        fechaRegreso: fechaR.toISOString(),
-        destino: destino,
-        descripcion: descripcion
-
+        descripcion: descripcion,
+        fechaInicio: new Date(fechaI),
+        fechaRegreso: new Date(fechaR),
+        destino: destino
       },
       {
         headers: {
@@ -76,13 +84,33 @@ export const updateMyTrip = async (formData, id) => {
     );
 
     console.log(
-      "Datos que vienen del servidor (getMyOneTrip)",
-      getMyOneTrip.data
+      "Datos que vienen del servidor (updateMyOneTrip)",
+      updateMyOneTrip.data
     );
 
-    return getMyOneTrip.data;
+    return updateMyOneTrip.data;
   } catch (error) {
-    console.error("Error al obtener mi viaje (getMyOneTrip)", error);
+    console.error("Error al actualizar mi viaje (updateMyTrip)", error.message);
+    throw error;
+  }
+};
+export const deleteMyTrip = async (id) => {
+  try {
+    console.log(id)
+    const deleteMyTrip = await axios.delete(`http://[::1]:8000/viajes/${id}`, {
+      headers: {
+        "Content-Type": "application-json",
+      },
+    });
+
+    console.log(
+      "Se borro (deleteMyTrip)",
+      deleteMyTrip.data
+    );
+
+    return deleteMyTrip.data;
+  } catch (error) {
+    console.error("Error al obtener borrar mi viaje (deleteMyTrip)", error);
     throw error;
   }
 };

@@ -1,11 +1,13 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { showMyDatos, updateMyDatos, deleteMyAccount } from "@/app/api/data/datos";
+import { useRouter } from "next/navigation";
+import { showMyDatos, updateMyDatos, deleteMyAccount,updateMyPassword } from "@/app/api/data/datos";
 import Modal from "@/components/Modal"; 
 
 async function getMyDatos(email) {
   try {
+
     const res = await showMyDatos(email);
     console.log("Respuesta del back: ", res);
     return res;
@@ -13,8 +15,21 @@ async function getMyDatos(email) {
     console.error("Hubo un error al querer traer los datos", error);
   }
 }
-
+async function updatePass(pass, id) {
+  try {
+    if (pass === '') {
+      console.log("No cambio la contraseña")
+    } else {
+      console.log(pass, " ", id)
+      const res = await updateMyPassword(pass, id)
+      console.log(res)
+    }
+  } catch (error) {
+    
+  }
+}
 function Datos() {
+  const {router} = useRouter()
   const { data: session, status } = useSession();
   const [misDatos, setMisDatos] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -25,9 +40,8 @@ function Datos() {
     apellidoP: "",
     apellidoM: "",
     email: "",
-    password: "",
   });
-
+  const [pass, setPass] = useState('')
   useEffect(() => {
     const myData = async () => {
       if (status === "authenticated") {
@@ -59,6 +73,7 @@ function Datos() {
     setIsEditing(false);
     try {
       const updatedData = await updateMyDatos(formData);
+      const updatePas = await updatePass(pass, formData.id)
       setMisDatos([updatedData]); // Actualiza misDatos con el dato actualizado
     } catch (error) {
       console.error("Error al guardar los datos:", error);
@@ -73,6 +88,10 @@ function Datos() {
     }));
   };
 
+    const handlePass = (e) => {
+        const pass =  e.target.value
+        setPass(pass)
+    }
   const handleDeleteClick = () => {
     setShowModal(true);
   };
@@ -80,8 +99,9 @@ function Datos() {
   const handleConfirmDelete = async () => {
     setShowModal(false);
     try {
-      await deleteMyAccount(session.user.email);
-      // Redirigir o mostrar un mensaje después de eliminar la cuenta
+      await deleteMyAccount(formData.id);
+      router.push("/")
+      router.refresh()
     } catch (error) {
       console.error("Error al eliminar la cuenta:", error);
     }
@@ -142,7 +162,7 @@ function Datos() {
                     type="password"
                     name="password"
                     value={formData.password}
-                    onChange={handleChange}
+                    onChange={handlePass}
                     className="w-full px-4 py-2 border rounded"
                   />
                 </div>

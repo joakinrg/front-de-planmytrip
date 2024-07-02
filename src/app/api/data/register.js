@@ -8,9 +8,9 @@ const cambiarFormato = (fechaStr) => {
 export const signUp = async (email, password, nombre, apellidoM, apellidoP) => {
   try {
 
-    console.log(email, " ", password, " ", nombre, " ", apellidoM, " ", apellidoP)
+    /* console.log(email, " ", password, " ", nombre, " ", apellidoM, " ", apellidoP)
 
- 
+  */
     const signUpSucc = await axios.post(
       `http://[::1]:8000/auth/register`,
       {
@@ -61,8 +61,8 @@ console.log(fechaIda)
     console.log({
       titulo: titulo,
       descripcion: descripcion,
-      fechaInicio: fechaInicio.toISOString(),
-      fechaRegreso: fechaFin.toISOString(),
+      fechaInicio: fechaInicio,
+      fechaRegreso: fechaFin ,
       destino: destino,
       presupuestoViaje: parseInt(presupuestoViaje),
       presupuestoTransporte: parseInt(presupuestoTransporte),
@@ -79,8 +79,8 @@ console.log(fechaIda)
       {
         titulo: titulo,
         descripcion: descripcion,
-        fechaInicio: fechaInicio.toISOString(),
-        fechaRegreso: fechaFin.toISOString(),
+        fechaInicio: new Date(fechaIda),
+        fechaRegreso: new Date(fechaRegreso),
         destino: destino,
         presupuestoViaje: parseInt(presupuestoViaje),
         presupuetoTransporte: parseInt(presupuestoTransporte),
@@ -99,7 +99,7 @@ console.log(fechaIda)
 
     return regTrip.data;
   } catch (error) {
-    console.error("Error al registrar el viaje: ", error.response.data);
+    console.error("Error al registrar el viaje: ", error.response);
 
     throw error;
   }
