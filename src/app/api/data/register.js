@@ -7,6 +7,10 @@ const cambiarFormato = (fechaStr) => {
 
 export const signUp = async (email, password, nombre, apellidoM, apellidoP) => {
   try {
+
+    console.log(email, " ", password, " ", nombre, " ", apellidoM, " ", apellidoP)
+
+ 
     const signUpSucc = await axios.post(
       `http://localhost:8000/auth/register`,
       {

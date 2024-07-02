@@ -1,142 +1,219 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
-import { showMyDatos, updateMyDatos } from '@/app/api/data/datos';
-import { useRouter } from 'next/navigation';
-async function fetchMyDatos(email) {
+import React, { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { showMyDatos, updateMyDatos, deleteMyAccount } from "@/app/api/data/datos";
+import Modal from "@/components/Modal"; 
+
+async function getMyDatos(email) {
   try {
     const res = await showMyDatos(email);
-    console.log("Se obtuvieron los datos: ", res);
+    console.log("Respuesta del back: ", res);
     return res;
   } catch (error) {
-    console.error("Error del servidor: No se pudieron traer los datos: ", error);
-    return [];
-  }
-}
-async function sendMyDatos(misDatos) {
-  try {
-    console.log(misDatos[0].id)
-    const res = await updateMyDatos(misDatos)
-    console.log("Se actualizaron los datos", res)
-    return res
-  } catch (error) {
-    console.error("Error del servidor: No se pudieron traer los datos: ", error)
+    console.error("Hubo un error al querer traer los datos", error);
   }
 }
 
-
-function Datos () {
-  const {push} = useRouter()
+function Datos() {
   const { data: session, status } = useSession();
   const [misDatos, setMisDatos] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
-    id: '',
-    nombre: '',
-    appat: '',
-    apmat: '',
-    email: '',
-    password: ''
+    id: "",
+    nombre: "",
+    apellidoP: "",
+    apellidoM: "",
+    email: "",
+    password: "",
   });
- 
+
   useEffect(() => {
-    const myTravel = async () => {
+    const myData = async () => {
       if (status === "authenticated") {
-        const datos = await fetchMyDatos(session.user.email);
-        setMisDatos(datos);
+        console.log(session.user.email);
+        const myDataResponse = await getMyDatos(session.user.email);
+        console.log("Prueba de que todo va ok: ", myDataResponse);
+        setMisDatos(myDataResponse);
         setFormData({
-        nombre: datos.nombre,
-        apellidoP: datos.apellidoP,
-        apellidoM: datos.apellidoM,
-        email: session.user.email
+          id: myDataResponse[0].id,
+          nombre: myDataResponse[0].persona.nombre,
+          apellidoP: myDataResponse[0].persona.apellidoP,
+          apellidoM: myDataResponse[0].persona.apellidoM,
+          email: myDataResponse[0].email,
         });
       }
     };
-
-    myTravel();
+    myData();
   }, [session, status]);
 
-  const handleEdit = () => {
+  const handleEditClick = () => {
     setIsEditing(true);
+  };
+
+  const handleCancelClick = () => {
+    setIsEditing(false);
+  };
+
+  const handleSaveClick = async () => {
+    setIsEditing(false);
+    try {
+      const updatedData = await updateMyDatos(formData);
+      setMisDatos([updatedData]); // Actualiza misDatos con el dato actualizado
+    } catch (error) {
+      console.error("Error al guardar los datos:", error);
+    }
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({ ...prevData, [name]: value }));
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Aquí iría la lógica para actualizar los datos del viaje
+  const handleDeleteClick = () => {
+    setShowModal(true);
+  };
 
-    const myNewTravel = async () => {
-      const updateMisDatos = await sendMyUpdateInfo(formData) 
-      if(updateMisDatos === undefined) {
-        push("/Usuario/Datos")
-      }  else {
-        push(`/Usuario/Viajes`)
-        
-      }
+  const handleConfirmDelete = async () => {
+    setShowModal(false);
+    try {
+      await deleteMyAccount(session.user.email);
+      // Redirigir o mostrar un mensaje después de eliminar la cuenta
+    } catch (error) {
+      console.error("Error al eliminar la cuenta:", error);
     }
-    
-myNewTravel()
-    console.log('Datos actualizados:', formData);
-    setIsEditing(false);
   };
 
   return (
-    <div className="relative min-h-screen bg-cover bg-center bg-gray-800 flex items-center justify-center" style={{ backgroundImage: "url('/fondo-mis-viajes.jpg')" }}>
+    <div className="relative min-h-screen bg-gray-800 flex items-center justify-center">
       <div className="absolute inset-0 bg-black opacity-50"></div>
-      <div className="relative z-10 flex flex-col items-center justify-center h-full text-white text-center">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8">Editar Viaje</h1>
+      <div className="relative z-10 bg-white bg-opacity-70 p-8 rounded-lg shadow-lg w-full max-w-md text-center">
+        <h1 className="text-2xl font-bold mb-4">Mis Datos</h1>
         {misDatos ? (
           <>
-            {!isEditing ? (
-              <div className="bg-gray-700 bg-opacity-70 text-white rounded-lg shadow-lg p-6 max-w-md mx-auto w-96">
-                <p className="mb-2"><strong>Mi nombre:</strong> {misDatos.nombre}</p>
-                <p className="mb-2"><strong>Mi Apellido Paterno:</strong> {misDatos.apellidoP}</p>
-                <p className="mb-2"><strong>Mi Apellido Materno:</strong> {misDatos.apellidoM}</p>
-                <p className="mb-2"><strong>Email:</strong> {misDatos.email}</p>
-                <div className="flex space-x-4 justify-center">
-                  <button onClick={handleEdit} className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg">Editar</button>
-                  <button className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg">Borrar</button>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="bg-gray-700 bg-opacity-70 text-white rounded-lg shadow-lg p-6 max-w-md mx-auto w-96">
+            {isEditing ? (
+              <form>
                 <div className="mb-4">
-                  <label className="block text-sm font-semibold mb-2" htmlFor="nombre">Nombre</label>
-                  <input type="text" id="nombre" name="nombre" value={formData.nombre} onChange={handleChange} className="w-full px-3 py-2 text-gray-800 rounded-lg" />
+                  <label className="block text-left">Nombre:</label>
+                  <input
+                    type="text"
+                    name="nombre"
+                    value={formData.nombre}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border rounded"
+                  />
                 </div>
                 <div className="mb-4">
-                  <label className="block text-sm font-semibold mb-2" htmlFor="apellidoP">Apellido Paterno</label>
-                  <input type="date" id="apellidoP" name="apellidoP" value={formData.apellidoP} onChange={handleChange} className="w-full px-3 py-2 text-gray-800 rounded-lg" />
+                  <label className="block text-left">Apellido Paterno:</label>
+                  <input
+                    type="text"
+                    name="apellidoP"
+                    value={formData.apellidoP}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border rounded"
+                  />
                 </div>
                 <div className="mb-4">
-                  <label className="block text-sm font-semibold mb-2" htmlFor="apellidoM">Apellido Materno</label>
-                  <input type="date" id="apellidoM" name="apellidoM" value={formData.apellidoM} onChange={handleChange} className="w-full px-3 py-2 text-gray-800 rounded-lg" />
+                  <label className="block text-left">Apellido Materno:</label>
+                  <input
+                    type="text"
+                    name="apellidoM"
+                    value={formData.apellidoM}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border rounded"
+                  />
                 </div>
                 <div className="mb-4">
-                  <label className="block text-sm font-semibold mb-2" htmlFor="email">Email</label>
-                  <input type="text" id="email" name="email" value={formData.email} onChange={handleChange} className="w-full px-3 py-2 text-gray-800 rounded-lg" />
+                  <label className="block text-left">Correo:</label>
+                  <input
+                    type="text"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border rounded"
+                  />
                 </div>
                 <div className="mb-4">
-                  <label className="block text-sm font-semibold mb-2" htmlFor="password">Password</label>
-                  <textarea id="password" name="password" value={formData.password} onChange={handleChange} className="w-full px-3 py-2 text-gray-800 rounded-lg"></textarea>
+                  <label className="block text-left">Contraseña:</label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border rounded"
+                  />
                 </div>
-                <div className="flex space-x-4 justify-center">
-                  <button type="submit" className="bg-green-500 hover:bg-green-600 text-white font-semibold px-4 py-2 rounded-lg">Guardar</button>
-                  <button type="button" onClick={() => setIsEditing(false)} className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg">Cancelar</button>
+                <div className="flex justify-between">
+                  <button
+                    type="button"
+                    onClick={handleSaveClick}
+                    className="px-4 py-2 bg-green-500 text-white rounded"
+                  >
+                    Guardar Cambios
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCancelClick}
+                    className="px-4 py-2 bg-red-500 text-white rounded"
+                  >
+                    Cancelar
+                  </button>
                 </div>
               </form>
+            ) : (
+              <div className="mb-4">
+                <p>Nombre: {misDatos[0].persona.nombre}</p>
+                <p>Apellido Paterno: {misDatos[0].persona.apellidoP}</p>
+                <p>Apellido Materno: {misDatos[0].persona.apellidoM}</p>
+                <p>Email: {misDatos[0].email}</p>
+                <div className="flex justify-between mt-4">
+                  <button
+                    onClick={handleEditClick}
+                    className="px-4 py-2 bg-blue-500 text-white rounded"
+                  >
+                    Editar
+                  </button>
+                  <button
+                    onClick={handleDeleteClick}
+                    className="px-4 py-2 bg-red-500 text-white rounded"
+                  >
+                    Eliminar Cuenta
+                  </button>
+                </div>
+              </div>
             )}
           </>
         ) : (
-          <div>Cargando datos...</div>
+          <p>Cargando mis datos...</p>
         )}
       </div>
+      {showModal && (
+        <Modal>
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <h2 className="text-xl font-bold mb-4">¿Seguro que quieres eliminar tu cuenta?</h2>
+            <div className="flex justify-around">
+              <button
+                onClick={handleConfirmDelete}
+                className="px-4 py-2 bg-red-500 text-white rounded"
+              >
+                Sí
+              </button>
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-4 py-2 bg-gray-500 text-white rounded"
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
 
 export default Datos;
+``

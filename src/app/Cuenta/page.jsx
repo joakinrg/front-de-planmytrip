@@ -17,6 +17,7 @@ function Cuenta() {
   //HandleSignup
   const handleSignUp = async (e) => {
     e.preventDefault();
+    console.log(email, " ", password, " ", username, " ", apellidoM, " ", apellidoP)
     const res = await signUp(email, password, username, apellidoM, apellidoP);
     console.log("Sign up response: ", res);
 
