@@ -2,6 +2,7 @@ import axios from "axios";
 
 
 export const showMyDatos = async (email) => {
+ 
   try {
     
     const getAllMyDatos = await axios.get(
@@ -12,7 +13,7 @@ export const showMyDatos = async (email) => {
         },
       }
     );
-
+ 
     console.log(
       "Datos que vienen del servidor (getAllDatos): ",
       getAllMyDatos.data
@@ -90,9 +91,10 @@ export const updateMyDatos = async (misDatos) => {
     );
   }
 };
-
+ 
 export const deleteMyAccount = async (id) => {
   try {
     console.log("Si llego id para borrar:", id);
   } catch (error) {}
 };
+ 

@@ -12,7 +12,7 @@ export const signUp = async (email, password, nombre, apellidoM, apellidoP) => {
 
  
     const signUpSucc = await axios.post(
-      `http://localhost:8000/auth/register`,
+      `http://[::1]:8000/auth/register`,
       {
         email: email,
         password: password,
@@ -75,7 +75,7 @@ console.log(fechaIda)
     
     
     const regTrip = await axios.post(
-      "http://localhost:8000/viajes/add",
+      "http://[::1]:8000/viajes/add",
       {
         titulo: titulo,
         descripcion: descripcion,
